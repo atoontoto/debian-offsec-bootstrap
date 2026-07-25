@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Burp Suite Community
+Comment=Authorized web application assessment proxy
+Exec=offsec-burp
+Terminal=false
+Categories=Security;Network;Development;

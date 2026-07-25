@@ -1,0 +1,3 @@
+id	compose_path	enabled
+bloodhound	/opt/offsec/stacks/bloodhound/compose.yml	true
+spiderfoot	/opt/offsec/stacks/spiderfoot/compose.yml	false

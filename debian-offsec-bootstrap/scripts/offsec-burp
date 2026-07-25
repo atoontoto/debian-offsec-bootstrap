@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+command -v burpsuite >/dev/null 2>&1 || { echo 'Burp Suite is not installed; see docs/INSTALLATION.md.' >&2; exit 1; }
+exec burpsuite "$@"

@@ -1,0 +1,18 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  safe-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y shellcheck bats python3
+      - name: Syntax and ShellCheck
+        run: make lint
+      - name: Unit tests and validation
+        run: make test validate
+# CI never installs offensive tools and never contacts assessment targets.

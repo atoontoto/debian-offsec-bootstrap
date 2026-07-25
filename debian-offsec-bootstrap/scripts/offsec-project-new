@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+[[ $# -eq 1 ]] || { echo 'Usage: offsec-project-new NAME' >&2; exit 2; }
+name="$1"
+[[ "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]] || { echo 'NAME may contain letters, digits, dot, underscore, and hyphen.' >&2; exit 2; }
+root="${HOME}/engagements/${name}"
+mkdir -p -- "$root"/{notes,evidence,scans,screenshots,loot,reports,scripts}
+chmod 0700 "$root" "$root/evidence" "$root/loot"
+printf 'Created %s (no scanning was performed).\n' "$root"

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+printf '%s\n' /usr/share/wordlists /opt/offsec/resources
+find /usr/share/wordlists /opt/offsec/resources -maxdepth 2 -type d -print 2>/dev/null | sort

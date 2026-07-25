@@ -1,0 +1,3 @@
+# id<TAB>owner/repo<TAB>tag<TAB>amd64-asset-regex<TAB>checksum-url-template-or--<TAB>executables<TAB>strip-components
+# Rows are intentionally absent until an upstream publishes a durable checksum URL.
+# Additions must remain pinned and checksum-verified; the installer refuses '-' checksums.

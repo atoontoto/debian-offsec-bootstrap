@@ -1,0 +1,3 @@
+# id<TAB>crate<TAB>version<TAB>features-or--<TAB>executables
+feroxbuster	feroxbuster	2.11.0	-	feroxbuster
+rustscan	rustscan	2.4.1	-	rustscan

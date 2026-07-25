@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+exec sudo /opt/offsec/bootstrap/update.sh "$@"

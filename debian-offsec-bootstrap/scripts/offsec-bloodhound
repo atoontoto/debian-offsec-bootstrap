@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+stack=/opt/offsec/stacks/bloodhound
+[[ -f "$stack/compose.yml" && -f "$stack/.env" ]] || { echo 'BloodHound stack is not installed.' >&2; exit 1; }
+compose=(docker compose --project-directory "$stack" --env-file "$stack/.env" -f "$stack/compose.yml")
+set_env() {
+  local key="$1" value="$2" tmp
+  tmp=$(mktemp "$stack/.env.tmp.XXXXXX")
+  awk -F= -v key="$key" '$1 != key {print}' "$stack/.env" > "$tmp"
+  printf '%s=%s\n' "$key" "$value" >> "$tmp"
+  chown root:root "$tmp"; chmod 0600 "$tmp"; mv -f "$tmp" "$stack/.env"
+}
+case "${1:-}" in
+  start) sudo "${compose[@]}" up -d ;;
+  stop) sudo "${compose[@]}" stop ;;
+  status) sudo "${compose[@]}" ps ;;
+  logs) sudo "${compose[@]}" logs --tail 200 ;;
+  backup)
+    dest="/var/lib/debian-offsec-bootstrap/bloodhound-backup-$(date -u +%Y%m%dT%H%M%SZ).sql"
+    sudo "${compose[@]}" exec -T app-db pg_dump -U bloodhound bloodhound | sudo tee "$dest" >/dev/null
+    sudo chmod 0600 "$dest"; echo "PostgreSQL backup written to $dest (Neo4j data requires a stopped volume snapshot)." ;;
+  reset-password) exec sudo "$0" _reset-root ;;
+  _reset-root)
+    [[ $(id -u) -eq 0 ]] || exit 1
+    password=$(openssl rand -base64 36 | tr -d '/+=' | head -c 32)
+    set_env BHE_ADMIN_PASSWORD "$password"; set_env BHE_RECREATE_DEFAULT_ADMIN true
+    "${compose[@]}" up -d --wait --force-recreate bloodhound
+    set_env BHE_RECREATE_DEFAULT_ADMIN false
+    "${compose[@]}" up -d --wait --force-recreate bloodhound
+    credential_file=/var/lib/debian-offsec-bootstrap/bloodhound-admin-password
+    umask 077; printf '%s\n' "$password" > "$credential_file"; chmod 0600 "$credential_file"
+    echo "Password reset; retrieve it once with: sudo cat $credential_file" ;;
+  upgrade) sudo "${compose[@]}" pull; echo 'Images pulled; run start to recreate explicitly.' ;;
+  *) echo 'Usage: offsec-bloodhound {start|stop|status|logs|backup [FILE]|reset-password|upgrade}' >&2; exit 2 ;;
+esac

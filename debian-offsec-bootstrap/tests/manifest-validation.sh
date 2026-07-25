@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
+quiet=false; [[ ${1:-} == --quiet ]] && quiet=true
+failures=0
+error() { printf 'manifest error: %s\n' "$*" >&2; failures=$((failures+1)); }
+catalog="$ROOT/manifests/tool-catalog.tsv"
+[[ -r "$catalog" ]] || { error 'catalog is missing'; exit 1; }
+declare -A ids=() channel_ids=() channel_methods=() methods=()
+line=1 count=0 core=0 standard=0
+while IFS=$'\t' read -r -a field || ((${#field[@]})); do
+  line=$((line+1)); [[ -z ${field[0]:-} ]] && continue; count=$((count+1))
+  ((${#field[@]} == 17)) || { error "$catalog:$line has ${#field[@]} fields"; continue; }
+  id=${field[0]}; [[ -z ${ids[$id]:-} ]] || error "duplicate catalog id: $id"; ids[$id]=1; methods[$id]=${field[3]}
+  [[ ${field[9]} =~ ^(true|false)$ && ${field[10]} =~ ^(true|false|optional)$ && ${field[11]} =~ ^(true|false)$ && ${field[12]} =~ ^(true|false)$ ]] || error "$id has invalid boolean fields"
+  [[ ${field[6]} =~ ^https?:// && (${field[7]} == - || ${field[7]} =~ ^https://) ]] || error "$id has invalid homepage/source URL"
+  [[ ${field[15]} =~ ^(core|standard|full|optional)$ ]] || error "$id has invalid profile"
+  [[ ${field[15]} == core ]] && core=$((core+1))
+  [[ ${field[15]} == core || ${field[15]} == standard ]] && standard=$((standard+1))
+done < <(tail -n +2 "$catalog")
+((count >= 100)) || error "catalog has only $count tools"
+((core >= 20 && core <= 35)) || error "core profile count $core is outside 20-35"
+((standard >= 90 && standard <= 125)) || error "standard profile count $standard is outside 90-125"
+
+while IFS=$'\t' read -r id _ || [[ -n "$id" ]]; do [[ -z "$id" || "$id" == \#* ]] && continue; channel_ids[$id]=1; channel_methods[$id]=pipx; done < "$ROOT/manifests/pipx-tools.txt"
+while IFS=$'\t' read -r id _ || [[ -n "$id" ]]; do [[ -z "$id" || "$id" == \#* ]] && continue; channel_ids[$id]=1; channel_methods[$id]=go; done < "$ROOT/manifests/go-tools.tsv"
+while IFS=$'\t' read -r id _ || [[ -n "$id" ]]; do [[ -z "$id" || "$id" == \#* ]] && continue; channel_ids[$id]=1; channel_methods[$id]=cargo; done < "$ROOT/manifests/cargo-tools.tsv"
+for id in "${!channel_ids[@]}"; do
+  [[ -n ${ids[$id]:-} ]] || { error "channel manifest id is absent from catalog: $id"; continue; }
+  [[ ${methods[$id]} == "${channel_methods[$id]}" ]] || error "channel/catalog method mismatch for $id"
+done
+for id in "${!methods[@]}"; do
+  [[ ${methods[$id]} =~ ^(pipx|go|cargo|github)$ ]] || continue
+  [[ -n ${channel_ids[$id]:-} ]] || error "catalog $id lacks its ${methods[$id]} channel manifest entry"
+done
+grep -RIE 'kali\.(org|linux)|http://http\.kali' "$ROOT/config" "$ROOT/manifests/apt-packages.txt" >/dev/null && error 'Kali repository reference found in package configuration'
+awk 'NF && $1 !~ /^#/ && NF != 1 {exit 1}' "$ROOT/manifests/apt-packages.txt" || error 'apt manifest must have one package per line'
+[[ $failures -eq 0 ]] || exit 1
+[[ "$quiet" == true ]] || printf 'Validated %d catalog tools (%d core, %d standard-inclusive).\n' "$count" "$core" "$standard"

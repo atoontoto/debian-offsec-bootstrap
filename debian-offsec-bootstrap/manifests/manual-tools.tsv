@@ -1,0 +1,31 @@
+# id<TAB>official_url<TAB>reason<TAB>verification
+burpsuite	https://portswigger.net/burp/communitydownload	License acceptance and a stable official URL/checksum are required	burpsuite
+ghidra	https://github.com/NationalSecurityAgency/ghidra/releases	Large GUI archive; install only after verifying the published digest	ghidraRun
+metasploit	https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html	Official Rapid7 package installer; never use Kali repositories	msfconsole --version
+inveigh	https://github.com/Kevin-Robertson/Inveigh	Windows-only resource; no host execution	manual
+azure-cli	https://learn.microsoft.com/cli/azure/install-azure-cli-linux	Optional vendor repository with separate trust boundary	az version
+google-cloud-cli	https://cloud.google.com/sdk/docs/install	Optional vendor repository with separate trust boundary	gcloud version
+owasp-zap	https://www.zaproxy.org/download/	Upstream desktop package and license	zap.sh -version
+jadx	https://github.com/skylot/jadx/releases	Upstream archive; verify release assets	jadx --version
+hayabusa	https://github.com/Yamato-Security/hayabusa/releases	No stable Debian package; use verified release	hayabusa --version
+chainsaw	https://github.com/WithSecureLabs/chainsaw/releases	No stable Debian package; use verified release	chainsaw --version
+yara-x	https://github.com/VirusTotal/yara-x/releases	Optional while YARA-X stabilizes	yrx --version
+spiderfoot	https://github.com/smicallef/spiderfoot	Run as localhost-only optional container	manual
+testssl	https://github.com/testssl/testssl.sh	Use Debian testssl.sh package when available	testssl.sh --version
+fuzzdb	https://github.com/fuzzdb-project/fuzzdb	Optional large resource repository	manual
+evil-winrm	https://github.com/Hackplayers/evil-winrm	Ruby tool; operator-managed due dependency churn	evil-winrm --version
+pkinittools	https://github.com/dirkjanm/PKINITtools	Source-only research scripts; review before use	manual
+targetedkerberoast	https://github.com/ShutdownRepo/targetedKerberoast	Source-only research script; review before use	manual
+windapsearch	https://github.com/ropnop/windapsearch	Source script; review before use	manual
+gef	https://github.com/hugsy/gef	GDB plugin modifies user configuration; explicit user choice required	manual
+pwndbg	https://github.com/pwndbg/pwndbg	GDB plugin modifies user configuration; explicit user choice required	manual
+one-gadget	https://github.com/david942j/one_gadget	Ruby gem; operator-managed	one_gadget --version
+nikto	https://github.com/sullo/nikto	Not packaged in Debian 13; review pinned source before installation	nikto -Version
+amass	https://github.com/owasp-amass/amass	Trixie has no package and the v4 build layout requires explicit support	amass -version
+bulk-extractor	https://github.com/simsong/bulk_extractor	Not packaged in Debian 13; source build is operator-managed	bulk_extractor -V
+hash-identifier	https://github.com/blackploit/hash-identifier	Not packaged in Debian 13; never import the Kali package	hash-identifier --help
+hashcat-utils	https://github.com/hashcat/hashcat-utils	Not packaged in Debian 13; source build is operator-managed	cap2hccapx --help
+kismet	https://www.kismetwireless.net/packages/	Optional vendor repository is a separate trust decision	kismet --version
+rsmangler	https://github.com/digininja/RSMangler	Not packaged in Debian 13; source review required	rsmangler --help
+cloud-enum	https://github.com/initstring/cloud_enum	Pinned source script with no Python packaging metadata	cloud_enum --help
+recon-ng	https://github.com/lanmaster53/recon-ng	Pinned source tree with no Python packaging metadata	recon-ng --help

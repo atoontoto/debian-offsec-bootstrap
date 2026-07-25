@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+IFS=$'\n\t'
+inventory=/var/lib/debian-offsec-bootstrap/inventory.json
+[[ -r "$inventory" ]] && jq . "$inventory" || echo 'No inventory yet; run sudo offsec-update or verify.sh.'

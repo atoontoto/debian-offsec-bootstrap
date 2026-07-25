@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=BloodHound CE (localhost)
+Comment=Open the locally managed BloodHound interface
+Exec=xdg-open http://127.0.0.1:8080/
+Terminal=false
+Categories=Security;Network;
