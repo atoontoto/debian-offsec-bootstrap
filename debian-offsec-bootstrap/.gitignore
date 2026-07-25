@@ -1,5 +1,0 @@
-config/local.conf
-docker/**/.env
-.state/
-*.log
-tests/tmp/
