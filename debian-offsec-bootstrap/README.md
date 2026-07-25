@@ -11,27 +11,19 @@ Debian remains the operating system and security boundary; this repository adds
 reviewable manifests, isolated tool channels, updates, verification, and safe
 uninstallation.
 
-Never add Kali repositories to Debian. Kali and Debian have different package
-selection, patching, and dependency assumptions; mixing repositories can silently
-replace core libraries and leave a system neither safely Debian nor safely Kali.
-This project uses Debian packages first and isolated upstream methods only when an
-adequate Trixie package does not exist.
 
 ## Quick start
 
 Review the scripts first, then on a fresh Debian 13 amd64 installation run:
 
 ```console
-git clone https://example.invalid/debian-offsec-bootstrap.git
+git clone https://github.com/atoontoto/debian-offsec-bootstrap.git
 cd debian-offsec-bootstrap
 sudo ./install.sh --profile standard --desktop xfce
 sudo ./update.sh
 sudo ./verify.sh --profile standard
 ```
 
-Replace the example clone URL with the repository's real trusted URL. The first
-installer run displays the authorized-use notice and asks for confirmation unless
-`--non-interactive` is used. Unattended mode never prompts.
 
 ## Profiles and storage
 
