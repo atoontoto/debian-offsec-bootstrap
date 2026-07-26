@@ -35,4 +35,6 @@ silently grant capabilities or change group membership.
 
 Free disk space, then rerun with `--resume`; operations are idempotent. A stale
 process—not a stale file—holds the `flock`, so a crash does not require deleting the
-lock file. Use `--dry-run` to review the next attempt.
+lock file. Missing destination directories are checked through their nearest existing
+parent; an “unknown” result indicates a `df`/filesystem error and is never fabricated
+as zero. Use `--dry-run` to review the next attempt.

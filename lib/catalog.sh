@@ -47,3 +47,7 @@ catalog_tool_field() {
   local wanted="$1" column="$2"
   awk -F '\t' -v id="$wanted" -v col="$column" '$1==id {print $col; exit}' "$PROJECT_ROOT/manifests/tool-catalog.tsv"
 }
+
+catalog_tool_required() {
+  [[ $(catalog_tool_field "$1" 16) == core ]]
+}

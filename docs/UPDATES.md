@@ -10,11 +10,11 @@ sudo ./verify.sh
 ```
 
 APT performs `update` followed by a configurable safe `upgrade --with-new-pkgs`.
-It does not run a distribution release upgrade. pipx environments upgrade as the
-invoking user. Go and Cargo tools are rebuilt through controlled staging. Managed
-wordlist repositories fetch and merge fast-forward only; local history is never
-reset. Verified GitHub assets must retain a pinned tag and checksum source. Docker
-images are pulled without restarting running containers.
+It does not run a distribution release upgrade. pipx environments are reinstalled at
+their manifest pins as the invoking user. Go and Cargo tools are rebuilt at their pins
+through controlled staging. Managed wordlist repositories fetch exact commit IDs and
+refuse local changes. Verified GitHub assets require a pinned tag and checksum source.
+Digest-pinned Docker images are pulled without restarting running containers.
 
 Use `--check`, `--apt-only`, `--tools-only`, `--category`, `--dry-run`, or
 `--non-interactive`. A summary separates success, optional failure, required failure,

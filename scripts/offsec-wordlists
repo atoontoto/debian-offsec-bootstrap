@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 IFS=$'\n\t'
-printf '%s\n' /usr/share/wordlists /opt/offsec/resources
-find /usr/share/wordlists /opt/offsec/resources -maxdepth 2 -type d -print 2>/dev/null | sort
+script=$(readlink -f -- "${BASH_SOURCE[0]}")
+bootstrap=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
+source "$bootstrap/config/load.sh"; load_offsec_config "$bootstrap"
+printf '%s\n' "$OFFSEC_WORDLIST_ROOT" "$OFFSEC_INSTALL_ROOT/resources"
+find "$OFFSEC_WORDLIST_ROOT" "$OFFSEC_INSTALL_ROOT/resources" -maxdepth 2 -type d -print 2>/dev/null | sort

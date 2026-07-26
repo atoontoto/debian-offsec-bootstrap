@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 IFS=$'\n\t'
-exec sudo /opt/offsec/bootstrap/update.sh "$@"
+script=$(readlink -f -- "${BASH_SOURCE[0]}")
+bootstrap=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
+if [[ $(id -u) -eq 0 ]]; then exec "$bootstrap/update.sh" "$@"; else exec sudo -- "$bootstrap/update.sh" "$@"; fi

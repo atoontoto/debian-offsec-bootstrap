@@ -1,0 +1,3 @@
+id	url	commit	link_name
+SecLists	https://github.com/danielmiessler/SecLists.git	a840dd2d47c01815f220150d1953af3b56a2b992	seclists
+PayloadsAllTheThings	https://github.com/swisskyrepo/PayloadsAllTheThings.git	434cc897f9b1e561f3804631e40643e6c82c3d14	payloadsallthethings

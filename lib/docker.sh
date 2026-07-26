@@ -9,28 +9,35 @@ docker_compose() {
 install_bloodhound_stack() {
   local source="$PROJECT_ROOT/docker/bloodhound" target="$OFFSEC_INSTALL_ROOT/stacks/bloodhound" env_file password
   env_file="$target/.env"
-  run install -d -m 0750 -- "$target"
+  ensure_managed_directory "$target" "$OFFSEC_INSTALL_ROOT" 0750
   run install -m 0644 -- "$source/compose.yml" "$target/compose.yml"
   run install -m 0644 -- "$source/README.md" "$target/README.md"
-  if [[ ! -e "$env_file" ]]; then
-    password=$(openssl rand -base64 32 | tr -d '/+=' | head -c 32)
-    if [[ "$DRY_RUN" == true ]]; then log_info '[DRY-RUN] generate BloodHound .env with a local random password'; else
-      umask 077
-      { printf 'BHE_ADMIN_PASSWORD=%s\n' "$password"; printf 'POSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 24)"; printf 'NEO4J_PASSWORD=%s\n' "$(openssl rand -hex 24)"; printf 'BHE_RECREATE_DEFAULT_ADMIN=false\n'; } > "$env_file"
-      chown root:root "$env_file"; chmod 0600 "$env_file"
-    fi
+  if [[ "$DRY_RUN" == true ]]; then
+    log_info '[DRY-RUN] would generate a root-only BloodHound .env with local random passwords if absent.'
+    record_success 'docker:bloodhound-ce (installed, not started)'
+    if [[ "$OFFSEC_AUTO_START_SERVICES" == true ]]; then run docker_compose -f "$target/compose.yml" up -d; fi
+    return 0
   fi
-  run install -m 0755 -- "$PROJECT_ROOT/scripts/offsec-bloodhound" /usr/local/bin/offsec-bloodhound
+  if [[ ! -e "$env_file" ]]; then
+    password=$(openssl rand -hex 16)
+    umask 077
+    { printf 'BHE_ADMIN_PASSWORD=%s\n' "$password"; printf 'POSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 24)"; printf 'NEO4J_PASSWORD=%s\n' "$(openssl rand -hex 24)"; printf 'BHE_RECREATE_DEFAULT_ADMIN=false\n'; } > "$env_file"
+    chown root:root "$env_file"; chmod 0600 "$env_file"
+  fi
   record_success 'docker:bloodhound-ce (installed, not started)'
-  [[ "$OFFSEC_AUTO_START_SERVICES" == true ]] && (cd "$target" && run docker_compose up -d)
+  if [[ "$OFFSEC_AUTO_START_SERVICES" == true ]]; then (cd "$target" && run docker_compose up -d); fi
+  return 0
 }
 
 docker_pull_stacks() {
   local manifest="$PROJECT_ROOT/manifests/docker-stacks.tsv" id compose enabled
   while IFS=$'\t' read -r id compose enabled || [[ -n "$id" ]]; do
     [[ "$id" == id || -z "$id" || "$id" == \#* || "$enabled" != true ]] && continue
+    if [[ "$id" == bloodhound && "$OFFSEC_INSTALL_BLOODHOUND" != true ]]; then record_skip 'docker:bloodhound (disabled)'; continue; fi
+    [[ "$compose" == /* ]] || compose="$OFFSEC_INSTALL_ROOT/$compose"
     [[ -f "$compose" ]] || compose="$OFFSEC_INSTALL_ROOT/stacks/$id/compose.yml"
-    [[ -f "$compose" ]] && run docker_compose -f "$compose" pull || record_failure "docker:$id pull" false
+    if [[ -f "$compose" ]]; then run docker_compose -f "$compose" pull || record_failure "docker:$id pull" false
+    else record_skip "docker:$id is not installed"; fi
   done < "$manifest"
 }
 

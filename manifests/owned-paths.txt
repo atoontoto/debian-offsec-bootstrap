@@ -1,4 +1,4 @@
-# Static project-owned paths. Dynamic channel executables are derived from tool-catalog.tsv.
+# Static project-owned paths. Bootstrap/channel paths derive from configured roots and the catalog.
 /usr/local/bin/offsec-tools
 /usr/local/bin/offsec-status
 /usr/local/bin/offsec-update
@@ -6,4 +6,3 @@
 /usr/local/bin/offsec-bloodhound
 /usr/local/bin/offsec-burp
 /usr/local/bin/offsec-project-new
-/opt/offsec/bootstrap

@@ -19,12 +19,25 @@ sudo ./install.sh --profile standard --desktop xfce
 sudo ./install.sh --profile core --desktop none --without-wordlists --without-bloodhound
 sudo ./install.sh --profile full --categories forensics,reverse-engineering
 sudo ./install.sh --dry-run --non-interactive
+sudo ./install.sh --non-interactive --accept-authorized-use
 ```
+
+Interactive confirmations read and write through the controlling terminal, so prompts
+remain visible after logging starts and answers are not copied to logs. A fresh actual
+install in `--non-interactive` mode requires `--accept-authorized-use`; a dry-run does
+not persist acceptance. If no controlling terminal exists, interactive mode fails
+clearly instead of reading redirected input or waiting indefinitely.
 
 `--resume` expresses intent to continue an interrupted run; all operations are
 idempotent regardless of the flag. A lock under `/run/lock` prevents concurrent
 install/update/uninstall operations. Optional failures are summarized and do not
 mask required foundation failures.
+
+Disk checks resolve each configured destination to its nearest existing parent and
+check every distinct backing filesystem. Missing directories are not created for the
+check, and a failed or malformed `df` result is reported as unknown rather than zero.
+Custom roots are recorded in the installed bootstrap configuration so all helper,
+update, verification, and uninstall paths continue to use them.
 
 ## Burp Suite Community
 

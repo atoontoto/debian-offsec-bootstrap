@@ -6,11 +6,17 @@ lint:
 
 test:
 	./tests/unit.sh
+	bash ./tests/disk-space.sh
+	python3 ./tests/archive-safety.py
+	python3 ./tests/shell-integration.py
+	python3 ./tests/prompt-pty.py || test $$? -eq 77
+	bash ./tests/dry-run.sh
 	./tests/idempotency.sh
 	./tests/smoke-test.sh
 
 validate:
 	./tests/manifest-validation.sh
+	python3 ./tests/repository-consistency.py
 	./tests/compose-validation.sh
 	python3 ./scripts/generate-catalog.py --check
 

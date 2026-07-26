@@ -10,8 +10,6 @@ jadx	https://github.com/skylot/jadx/releases	Upstream archive; verify release as
 hayabusa	https://github.com/Yamato-Security/hayabusa/releases	No stable Debian package; use verified release	hayabusa --version
 chainsaw	https://github.com/WithSecureLabs/chainsaw/releases	No stable Debian package; use verified release	chainsaw --version
 yara-x	https://github.com/VirusTotal/yara-x/releases	Optional while YARA-X stabilizes	yrx --version
-spiderfoot	https://github.com/smicallef/spiderfoot	Run as localhost-only optional container	manual
-testssl	https://github.com/testssl/testssl.sh	Use Debian testssl.sh package when available	testssl.sh --version
 fuzzdb	https://github.com/fuzzdb-project/fuzzdb	Optional large resource repository	manual
 evil-winrm	https://github.com/Hackplayers/evil-winrm	Ruby tool; operator-managed due dependency churn	evil-winrm --version
 pkinittools	https://github.com/dirkjanm/PKINITtools	Source-only research scripts; review before use	manual
@@ -29,3 +27,25 @@ kismet	https://www.kismetwireless.net/packages/	Optional vendor repository is a 
 rsmangler	https://github.com/digininja/RSMangler	Not packaged in Debian 13; source review required	rsmangler --help
 cloud-enum	https://github.com/initstring/cloud_enum	Pinned source script with no Python packaging metadata	cloud_enum --help
 recon-ng	https://github.com/lanmaster53/recon-ng	Pinned source tree with no Python packaging metadata	recon-ng --help
+tplmap	https://github.com/epinna/tplmap	Source-only research tool; review and pin dependencies before use	tplmap --help
+jwt-tool	https://github.com/ticarpi/jwt_tool	Source-only research tool; review and pin dependencies before use	jwt_tool.py --help
+responder	https://github.com/lgandx/Responder	Network listener tool remains an explicit operator-managed install	responder --help
+searchsploit	https://gitlab.com/exploit-database/exploitdb	Controlled source clone requires explicit license and pin review	searchsploit -h
+radare2	https://github.com/radareorg/radare2	Source release and build dependencies require explicit review	r2 -v
+rizin	https://github.com/rizinorg/rizin	Alternative reverse-engineering suite; explicit operator choice	rizin -v
+cutter	https://github.com/rizinorg/cutter	Large GUI release coupled to a compatible Rizin version	cutter --version
+kubectl	https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/	Use the official checksum-verified binary	kubectl version --client
+helm	https://helm.sh/docs/intro/install/	Use a checksum-verified official release	helm version
+k9s	https://github.com/derailed/k9s/releases	Use a checksum-verified official release	k9s version
+trivy	https://trivy.dev/latest/getting-started/installation/	Use the signed vendor repository or verified release	trivy --version
+grype	https://github.com/anchore/grype/releases	Use a checksum-verified official release	grype version
+syft	https://github.com/anchore/syft/releases	Use a checksum-verified official release	syft version
+cosign	https://docs.sigstore.dev/cosign/system_config/installation/	Follow Sigstore release verification procedures	cosign version
+kubescape	https://github.com/kubescape/kubescape/releases	Use a checksum-verified official release	kubescape version
+kube-bench	https://github.com/aquasecurity/kube-bench/releases	Host audit access and release verification require explicit review	kube-bench version
+prowler	https://github.com/prowler-cloud/prowler	Use an isolated upstream-supported installation after dependency review	prowler --version
+dive	https://github.com/wagoodman/dive/releases	Use a checksum-verified official release	dive --version
+photon	https://github.com/s0md3v/Photon	Source-only crawler; review and pin dependencies before use	manual
+seclists	https://github.com/danielmiessler/SecLists	Installed by the pinned managed-resource channel	test -d /usr/share/wordlists/seclists
+rockyou	https://packages.debian.org/trixie/wordlists	Use only the Debian-packaged archive when present	test -f /usr/share/wordlists/rockyou.txt
+payloadsallthethings	https://github.com/swisskyrepo/PayloadsAllTheThings	Installed by the pinned managed-resource channel	test -d /usr/share/wordlists/payloadsallthethings

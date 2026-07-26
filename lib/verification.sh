@@ -27,10 +27,10 @@ verify_expected_commands() {
 write_inventory() {
   local target="$OFFSEC_STATE_ROOT/inventory.json" tmp user
   run install -d -m 0755 "$OFFSEC_STATE_ROOT"
+  if [[ "$DRY_RUN" == true ]]; then log_info '[DRY-RUN] would generate and atomically install inventory.json.'; return 0; fi
   new_temp_dir tmp_dir
   # shellcheck disable=SC2154  # assigned by validated pass-by-name helper
   tmp="$tmp_dir/inventory.json"; user=$(invoking_user)
-  if [[ "$DRY_RUN" == true ]]; then return 0; fi
   python3 "$PROJECT_ROOT/scripts/build-inventory.py" --catalog "$PROJECT_ROOT/manifests/tool-catalog.tsv" --profile "$OFFSEC_PROFILE" --output "$tmp" --owner "$user"
   atomic_install_file "$tmp" "$target" 0644
 }

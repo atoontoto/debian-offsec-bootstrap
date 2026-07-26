@@ -1,7 +1,7 @@
 name: offsec-bloodhound
 services:
   app-db:
-    image: docker.io/library/postgres:16.6-alpine
+    image: docker.io/library/postgres:16.6-alpine@sha256:1d04b9ba1d4996401f2552b51beda8187f175c0645c091e4781134fc9c9a3eef
     restart: "no"
     environment:
       POSTGRES_USER: bloodhound
@@ -18,7 +18,7 @@ services:
       - no-new-privileges:true
 
   graph-db:
-    image: docker.io/library/neo4j:4.4.42
+    image: docker.io/library/neo4j:4.4.42@sha256:73b5a47eb9952f47fcc42fcc80bdd6bd0d6b71eea9a1a345c216675498c790e4
     restart: "no"
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?set in .env}
@@ -35,7 +35,7 @@ services:
       - no-new-privileges:true
 
   bloodhound:
-    image: docker.io/specterops/bloodhound:9.1.0
+    image: docker.io/specterops/bloodhound:9.1.0@sha256:0afafb9de0cfd36f233a4952d82dde56ed50f31167a5c588419446414f83ddd0
     restart: "no"
     depends_on:
       app-db:

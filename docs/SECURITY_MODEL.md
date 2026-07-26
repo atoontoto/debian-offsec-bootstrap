@@ -7,8 +7,10 @@ Debian APT is preferred because Debian provides signatures, integration, and
 security maintenance. Other channels are isolated and pinned where practical.
 
 Downloads require HTTPS. Executable archives require a configured upstream digest;
-missing verification becomes a reported manual step. Archives are listed before
-extraction and absolute/traversal paths are rejected. There is no `eval`, remote
+missing verification becomes a reported manual step. Archive metadata is validated
+before extraction; traversal, absolute/backslash paths, links, devices, FIFOs,
+duplicate paths, file/parent collisions, and encrypted ZIP entries are rejected.
+There is no `eval`, remote
 script pipe, global pip, destructive Git reset, Kali/Ubuntu repository, silent
 Docker-group grant, or broad capability assignment.
 
@@ -20,7 +22,8 @@ vulnerable applications on the host.
 
 Secrets are generated locally with restrictive permissions and excluded from Git.
 Logging helpers redact common token/password forms; scripts never print BloodHound
-secrets. Inventory records command paths/versions, not credentials. Assessment data
+secrets. Prompts bypass the logging pipeline and prompt answers are never logged.
+Inventory records command paths/versions, not credentials. Assessment data
 is outside project-owned removal roots.
 
 Residual risks include compromised upstream releases, malicious tool behavior,

@@ -63,7 +63,7 @@ sudo ./install.sh --profile full
 sudo ./install.sh --categories web,network,ad
 sudo ./install.sh --desktop xfce        # also supports gnome, kde, none
 sudo ./install.sh --with-burp --with-bloodhound --with-wordlists
-sudo ./install.sh --non-interactive --resume
+sudo ./install.sh --non-interactive --accept-authorized-use --resume
 sudo ./install.sh --dry-run
 ```
 
@@ -116,9 +116,9 @@ sudo ./uninstall.sh --all
 sudo ./uninstall.sh --all --purge-data
 ```
 
-Updates use Debian's safe upgrade, pipx upgrades, pinned Go/Cargo reinstalls,
-fast-forward-only managed Git updates, verified release downloads, and Docker
-image pulls. Active stacks are not restarted. The optional systemd timer is shipped
+Updates use Debian's safe upgrade, pinned pipx/Go/Cargo reinstalls,
+commit-pinned managed Git resources, verified release downloads, and digest-pinned
+Docker image pulls. Active stacks are not restarted. The optional systemd timer is shipped
 disabled. Verification checks manifests, commands, pipx, Compose, symlinks,
 permissions, versions, and inventory. It returns nonzero only for missing required
 core-profile commands or invalid required state.

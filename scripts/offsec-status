@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 IFS=$'\n\t'
-inventory=/var/lib/debian-offsec-bootstrap/inventory.json
+script=$(readlink -f -- "${BASH_SOURCE[0]}")
+bootstrap=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
+source "$bootstrap/config/load.sh"; load_offsec_config "$bootstrap"
+inventory="$OFFSEC_STATE_ROOT/inventory.json"
 [[ -r "$inventory" ]] && jq . "$inventory" || echo 'No inventory yet; run sudo offsec-update or verify.sh.'

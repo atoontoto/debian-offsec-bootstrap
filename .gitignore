@@ -1,4 +1,5 @@
 config/local.conf
+config/installed.conf
 docker/**/.env
 .env
 .env.*

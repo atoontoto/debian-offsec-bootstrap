@@ -1,10 +1,10 @@
 [Unit]
 Description=Weekly debian-offsec-bootstrap maintenance
-Documentation=file:/opt/offsec/bootstrap/docs/UPDATES.md
-ConditionPathExists=/opt/offsec/bootstrap/update.sh
+Documentation=https://github.com/atoontoto/debian-offsec-bootstrap
+ConditionPathExists=/usr/local/bin/offsec-update
 
 [Service]
 Type=oneshot
-ExecStart=/opt/offsec/bootstrap/update.sh --non-interactive
+ExecStart=/usr/local/bin/offsec-update --non-interactive
 Nice=10
 IOSchedulingClass=idle

@@ -5,8 +5,14 @@ IFS=$'\n\t'
 APT_UPDATED=false
 
 apt_refresh() {
+  local audit
   [[ "$APT_UPDATED" == true ]] && return 0
-  run env DEBIAN_FRONTEND=noninteractive apt-get update
+  audit=$(dpkg --audit 2>/dev/null) || die 'dpkg audit failed; repair package state before continuing.'
+  if [[ -n "$audit" ]]; then
+    log_warn 'Interrupted or incomplete dpkg state detected; running dpkg --configure -a.'
+    run env DEBIAN_FRONTEND=noninteractive dpkg --configure -a
+  fi
+  run env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=120 update
   APT_UPDATED=true
 }
 
@@ -20,7 +26,7 @@ apt_install_packages() {
     if apt_package_exists "$package"; then available+=("$package"); else unavailable+=("$package"); fi
   done
   if ((${#available[@]})); then
-    if run env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -- "${available[@]}"; then
+    if run env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=120 install -y --no-install-recommends -- "${available[@]}"; then
       for package in "${available[@]}"; do record_success "apt:$package"; done
     else
       for package in "${available[@]}"; do record_failure "apt:$package" "$required"; done
@@ -39,16 +45,19 @@ apt_install_foundation() {
 }
 
 apt_install_category() {
-  local category="$1" row package
-  local packages=()
+  local category="$1" row package profile
+  local required_packages=() optional_packages=()
   while IFS= read -r row; do
-    IFS=$'\t' read -r _ _ _ _ package _ <<< "$row"
-    packages+=("$package")
+    IFS=$'\t' read -r _ _ _ _ package _ _ _ _ _ _ _ _ _ _ profile _ <<< "$row"
+    if [[ "$profile" == core ]]; then required_packages+=("$package"); else optional_packages+=("$package"); fi
   done < <(catalog_rows apt "$category")
-  ((${#packages[@]})) && apt_install_packages false "${packages[@]}"
+  if ((${#required_packages[@]})); then apt_install_packages true "${required_packages[@]}"; fi
+  if ((${#optional_packages[@]})); then apt_install_packages false "${optional_packages[@]}"; fi
+  return 0
 }
 
 apt_safe_upgrade() {
   apt_refresh
-  [[ "$OFFSEC_SAFE_UPGRADE" == true ]] && run env DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --with-new-pkgs
+  if [[ "$OFFSEC_SAFE_UPGRADE" == true ]]; then run env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=120 upgrade -y --with-new-pkgs; fi
+  return 0
 }

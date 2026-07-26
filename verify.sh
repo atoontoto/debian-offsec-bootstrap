@@ -8,6 +8,7 @@ for lib in logging common catalog pipx docker verification; do
   source "$PROJECT_ROOT/lib/$lib.sh"
 done
 trap cleanup_common EXIT
+trap 'report_entrypoint_error "$?" "$LINENO" verifier' ERR
 VERIFY_CATEGORY='' QUICK=false JSON=false
 usage() { echo 'Usage: ./verify.sh [--profile core|standard|full] [--category NAME] [--json] [--quick]'; }
 while (($#)); do case "$1" in
@@ -15,6 +16,9 @@ while (($#)); do case "$1" in
   --category) (($#>=2)) || die '--category requires a value'; VERIFY_CATEGORY="$2"; shift 2 ;;
   --json) JSON=true; shift ;; --quick) QUICK=true; shift ;; --help|-h) usage; exit 0 ;; *) die "Unknown option: $1" ;; esac; done
 [[ "$OFFSEC_PROFILE" =~ ^(core|standard|full)$ ]] || die 'Invalid profile.'
+[[ -z "$VERIFY_CATEGORY" ]] || valid_category "$VERIFY_CATEGORY" || die "Unknown category: $VERIFY_CATEGORY"
+validate_runtime_config
+catalog_validate "$PROJECT_ROOT/manifests/tool-catalog.tsv" || die 'Catalog validation failed.'
 if [[ "$JSON" == true ]]; then
   new_temp_dir tmp_dir
   # shellcheck disable=SC2154  # assigned by validated pass-by-name helper
@@ -33,4 +37,5 @@ if [[ "$QUICK" == false ]]; then
   [[ $(id -u) -eq 0 ]] && write_inventory || log_warn 'Run as root to refresh the system inventory.'
 fi
 printf 'Verification complete: %d required failure(s), %d warning(s).\n' "$VERIFY_REQUIRED_FAILURES" "$VERIFY_WARNINGS"
-((VERIFY_REQUIRED_FAILURES == 0))
+if ((VERIFY_REQUIRED_FAILURES > 0)); then exit 1; fi
+exit 0

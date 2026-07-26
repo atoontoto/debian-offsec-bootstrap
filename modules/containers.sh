@@ -6,6 +6,7 @@ module_install() {
   if [[ "$OFFSEC_ALLOW_DOCKER_GROUP" == true ]]; then
     local user; user=$(invoking_user)
     log_warn 'Docker group membership is effectively root-equivalent.'
-    [[ "$user" != root ]] && run usermod -aG docker "$user"
+    if [[ "$user" != root ]]; then run usermod -aG docker "$user"; fi
   fi
+  return 0
 }

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 IFS=$'\n\t'
-catalog=/opt/offsec/bootstrap/manifests/tool-catalog.tsv
+script=$(readlink -f -- "${BASH_SOURCE[0]}")
+bootstrap=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
+catalog="$bootstrap/manifests/tool-catalog.tsv"
 [[ -r "$catalog" ]] || { echo 'Catalog not installed.' >&2; exit 1; }
 awk -F '\t' 'NR>1 {printf "%-24s %-20s %s\n", $2, $3, $4}' "$catalog"

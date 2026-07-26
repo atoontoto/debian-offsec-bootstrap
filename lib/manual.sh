@@ -9,13 +9,18 @@ install_burp() {
     return 0
   fi
   [[ "$url" =~ ^https://([a-z0-9-]+\.)*portswigger\.net/ ]] || die 'Burp URL must be on an official portswigger.net HTTPS host.'
-  new_temp_dir tmp; installer="$tmp/burp-installer.sh"; download_https "$url" "$installer"
+  if [[ "$DRY_RUN" == true ]]; then record_success 'manual:burpsuite (verified official installer plan)'; return 0; fi
+  new_temp_dir tmp; installer="$tmp/burp-installer.sh"
+  download_https "$url" "$installer" || { record_failure 'burpsuite download' false; return; }
   verify_sha256 "$installer" "$digest" || { record_failure 'burpsuite checksum' false; return; }
   run chmod 0700 "$installer"
   if run "$installer" -q -dir /opt/burpsuite-community; then
-    local launcher
+    local launcher marker
     launcher=$(find /opt/burpsuite-community -maxdepth 2 -type f -iname '*Burp*Community*' -print -quit)
-    [[ -n "$launcher" ]] && run ln -sfn "$launcher" /usr/local/bin/burpsuite
+    if [[ -n "$launcher" ]]; then install_managed_symlink "$launcher" /usr/local/bin/burpsuite /opt/burpsuite-community; fi
+    marker="$tmp/.debian-offsec-bootstrap-owned"
+    printf 'debian-offsec-bootstrap\n' > "$marker"
+    atomic_install_file "$marker" /opt/burpsuite-community/.debian-offsec-bootstrap-owned 0600
     record_success 'manual:burpsuite'
   else record_failure 'manual:burpsuite' false; fi
 }
