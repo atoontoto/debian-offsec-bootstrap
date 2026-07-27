@@ -1,3 +1,6 @@
-# id<TAB>owner/repo<TAB>tag<TAB>amd64-asset-regex<TAB>checksum-url-template-or--<TAB>executables<TAB>strip-components
-# Rows are intentionally absent until an upstream publishes a durable checksum URL.
+# Legacy rows: id<TAB>owner/repo<TAB>tag<TAB>amd64-asset-regex<TAB>checksum-url-template-or--<TAB>executables<TAB>strip-components
+# Component rows: tool-id<TAB>component-id<TAB>owner/repo<TAB>tag<TAB>architecture<TAB>asset-regex<TAB>checksum-url-template<TAB>archive-executable:installed-command mappings<TAB>strip-components<TAB>verification-arguments
+# Component rows let one logical catalog tool own multiple release assets and rename generic archive executables.
 # Additions must remain pinned and checksum-verified; the installer refuses '-' checksums.
+ligolo-ng	ligolo-ng-proxy	nicocha30/ligolo-ng	v0.8.3	amd64	^ligolo-ng_proxy_0[.]8[.]3_linux_amd64[.]tar[.]gz$	https://github.com/nicocha30/ligolo-ng/releases/download/v0.8.3/ligolo-ng_0.8.3_checksums.txt	proxy:ligolo-proxy	0	-version
+ligolo-ng	ligolo-ng-agent	nicocha30/ligolo-ng	v0.8.3	amd64	^ligolo-ng_agent_0[.]8[.]3_linux_amd64[.]tar[.]gz$	https://github.com/nicocha30/ligolo-ng/releases/download/v0.8.3/ligolo-ng_0.8.3_checksums.txt	agent:ligolo-agent	0	-version

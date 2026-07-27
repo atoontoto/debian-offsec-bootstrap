@@ -31,7 +31,7 @@ write_inventory() {
   new_temp_dir tmp_dir
   # shellcheck disable=SC2154  # assigned by validated pass-by-name helper
   tmp="$tmp_dir/inventory.json"; user=$(invoking_user)
-  python3 "$PROJECT_ROOT/scripts/build-inventory.py" --catalog "$PROJECT_ROOT/manifests/tool-catalog.tsv" --profile "$OFFSEC_PROFILE" --output "$tmp" --owner "$user"
+  python3 "$PROJECT_ROOT/scripts/build-inventory.py" --catalog "$PROJECT_ROOT/manifests/tool-catalog.tsv" --profile "$OFFSEC_PROFILE" --output "$tmp" --owner "$user" --github-state "$OFFSEC_STATE_ROOT/github-installed.tsv"
   atomic_install_file "$tmp" "$target" 0644
 }
 
@@ -44,6 +44,19 @@ verify_owned_paths() {
 }
 
 verify_symlinks() {
-  local link
+  local link id method executables exe expected_root resolved
   while IFS= read -r -d '' link; do [[ -e "$link" ]] || { log_warn "Broken symlink: $link"; ((VERIFY_WARNINGS+=1)); }; done < <(find /usr/local/bin -maxdepth 1 -type l -name 'offsec-*' -print0 2>/dev/null)
+  while IFS=$'\t' read -r id _ _ method _ executables _ || [[ -n "$id" ]]; do
+    [[ "$id" == id || -z "$id" || "$id" == \#* ]] && continue
+    [[ "$method" =~ ^(go|cargo|github)$ ]] || continue
+    expected_root="$OFFSEC_INSTALL_ROOT"
+    IFS=',' read -r -a exe_list <<< "$executables"
+    for exe in "${exe_list[@]}"; do
+      link="/usr/local/bin/$exe"
+      if [[ ! -L "$link" ]]; then log_warn "Missing managed command symlink: $link"; ((VERIFY_WARNINGS+=1)); continue; fi
+      resolved=$(realpath -m -- "$link")
+      path_is_within "$resolved" "$(realpath -m -- "$expected_root")" || { log_warn "Managed command points outside $expected_root: $link"; ((VERIFY_WARNINGS+=1)); continue; }
+      [[ -e "$link" ]] || { log_warn "Broken managed command symlink: $link"; ((VERIFY_WARNINGS+=1)); }
+    done
+  done < "$PROJECT_ROOT/manifests/tool-catalog.tsv"
 }

@@ -6,6 +6,7 @@ lint:
 
 test:
 	./tests/unit.sh
+	bash ./tests/github-tools.sh
 	bash ./tests/disk-space.sh
 	python3 ./tests/archive-safety.py
 	python3 ./tests/shell-integration.py

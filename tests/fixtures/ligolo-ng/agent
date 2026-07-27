@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+[[ ${1:-} == -version || ${1:-} == --version ]] || { echo 'fake agent refuses networking arguments' >&2; exit 64; }
+[[ ${FAIL_ACTIVE_AGENT:-false} != true || ${0##*/} != ligolo-agent ]] || exit 65
+[[ -z ${FAKE_LIGOLO_LOG:-} ]] || printf 'agent\t%s\n' "$*" >> "$FAKE_LIGOLO_LOG"
+printf 'Ligolo-ng v0.8.3 / fixture / test\n'

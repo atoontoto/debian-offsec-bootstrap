@@ -38,7 +38,7 @@ remove_project_helper() {
   fi
 }
 remove_tool() {
-  local id="$1" method executables exe user package stack resource_name resource_url resource_link resource_target burp_marker rockyou_marker
+  local id="$1" method executables exe user package stack resource_name resource_url resource_link resource_target burp_marker rockyou_marker state_tmp state_file
   method=$(catalog_tool_field "$id" 4); package=$(catalog_tool_field "$id" 5); executables=$(catalog_tool_field "$id" 6)
   [[ -n "$method" ]] || { record_failure "unknown tool:$id" true; return; }
   case "$method" in
@@ -55,7 +55,15 @@ remove_tool() {
         [[ "$method" == go && -f "$OFFSEC_INSTALL_ROOT/go/bin/$exe" ]] && run rm -f -- "$OFFSEC_INSTALL_ROOT/go/bin/$exe"
         [[ "$method" == cargo && -f "$OFFSEC_INSTALL_ROOT/cargo/bin/$exe" ]] && run rm -f -- "$OFFSEC_INSTALL_ROOT/cargo/bin/$exe"
       done
-      [[ -d "$OFFSEC_INSTALL_ROOT/tools/$id" ]] && safe_remove_tree "$OFFSEC_INSTALL_ROOT/tools/$id" "$OFFSEC_INSTALL_ROOT" ;;
+      [[ -d "$OFFSEC_INSTALL_ROOT/tools/$id" ]] && safe_remove_tree "$OFFSEC_INSTALL_ROOT/tools/$id" "$OFFSEC_INSTALL_ROOT"
+      if [[ "$method" == github && -f "$OFFSEC_STATE_ROOT/github-installed.tsv" ]]; then
+        state_file="$OFFSEC_STATE_ROOT/github-installed.tsv"
+        new_temp_dir github_uninstall_state
+        state_tmp="$github_uninstall_state/github-installed.tsv"
+        awk -F '\t' -v wanted="$id" '$1 != wanted' "$state_file" > "$state_tmp"
+        atomic_install_file "$state_tmp" "$state_file" 0644
+      fi
+      ;;
     apt) record_skip "apt:$package is shared system state and was not removed" ;;
     docker)
       if [[ "$id" == bloodhound-ce && "$PURGE" == true ]]; then

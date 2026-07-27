@@ -65,6 +65,37 @@ Wireless installation requires compatible hardware. The installer does not enabl
 monitor mode, stop NetworkManager, alter DNS, enable forwarding, or change radio
 state.
 
+## Pivoting tools
+
+The standard `network` category installs pinned Chisel and Ligolo-ng releases.
+Chisel is one `chisel` binary with explicit `client` and `server` subcommands.
+Ligolo-ng is installed from its official checksum-verified proxy and agent archives
+as `ligolo-proxy` and `ligolo-agent`; the generic upstream names `proxy` and `agent`
+are never added to `/usr/local/bin`.
+
+Ligolo-ng uses a TUN-based pivoting model. The agent itself does not require
+administrative privileges, while the proxy operator needs permission to create and
+manage a TUN interface. Debian's ordinary kernel TUN device is sufficient; this
+bootstrap does not create an interface or route, enable forwarding, grant a broad
+capability, change sysctls or firewall rules, or start either role. If `/dev/net/tun`
+is unavailable, fix that runtime prerequisite according to the host's own security
+policy rather than weakening it during installation.
+
+For an explicitly authorized assessment, review each tool's upstream documentation
+and invoke roles yourself with scoped names and credentials, for example:
+
+```console
+sudo ligolo-proxy -selfcert
+ligolo-agent -connect authorized-proxy.example:11601 -accept-fingerprint '<reviewed-fingerprint>'
+
+chisel server --port '<approved-port>' --auth '<reviewed-user:password>'
+chisel client 'https://authorized-server.example' '<approved-local-port>:authorized-service.example:<approved-service-port>'
+```
+
+These are operator actions that create network activity; installation, update,
+inventory, verification, and dry-run never run them. Use both tools only on systems
+you own or are explicitly authorized to assess.
+
 ## Large components
 
 Use `--without-burp`, `--without-bloodhound`, `--without-wordlists`,

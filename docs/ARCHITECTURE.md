@@ -30,6 +30,21 @@ links are derived from the catalog so uninstallation does not guess at ownership
 Helpers are managed links into the installed bootstrap and load a generated,
 root-owned `config/installed.conf`, which preserves validated custom roots and pins.
 
+The verified GitHub channel supports its original seven-column, single-asset rows
+and a ten-column component form:
+
+```text
+tool-id<TAB>component-id<TAB>owner/repo<TAB>tag<TAB>architecture<TAB>asset-regex<TAB>checksum-url<TAB>archive-executable:installed-command mappings<TAB>strip-components<TAB>verification-arguments
+```
+
+Component rows let several pinned release archives activate as one logical tool.
+Mappings such as `proxy:ligolo-proxy` preserve an archive's internal filename while
+exposing a specific managed command. Asset regular expressions must be fully
+anchored, exactly one official release asset must match, every archive is checked
+against one unambiguous SHA-256 entry from the configured upstream checksum file,
+and all components pass archive/executable validation before atomic activation.
+Legacy mappings without `:` retain the archive basename as the installed command.
+
 APT identifiers can be audited offline against Debian's official repository metadata
 with `make validate-debian PACKAGES_INDEX=/path/to/Packages.xz`. The release was
 validated against Trixie's official amd64 `main` index on 2026-07-26; runtime

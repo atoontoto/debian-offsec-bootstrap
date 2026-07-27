@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added first-class pinned Chisel and checksum-verified, multi-component Ligolo-ng
+  support to the standard network profile, without starting networking behavior.
+- Extended verified GitHub manifests with backward-compatible component rows and
+  executable rename mappings, atomic activation/rollback, and per-component checks.
 - Fixed controlling-terminal prompts, explicit non-interactive authorization, prompt
   logging isolation, and logging-pipeline shutdown.
 - Fixed disk checks for missing/custom destinations and multiple filesystems, with

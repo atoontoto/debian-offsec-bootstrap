@@ -23,16 +23,16 @@ CATEGORIES = {
 }
 METHODS = {"apt", "pipx", "go", "cargo", "github", "docker", "manual"}
 BOOL_COLUMNS = ("needs_root", "network_service", "requires_docker", "gui")
-CHANNELS = {
+CHANNELS: dict[str, tuple[str, int | tuple[int, ...]]] = {
     "pipx": ("pipx-tools.txt", 5),
     "go": ("go-tools.tsv", 4),
     "cargo": ("cargo-tools.tsv", 5),
-    "github": ("github-tools.tsv", 7),
+    "github": ("github-tools.tsv", (7, 10)),
     "manual": ("manual-tools.tsv", 4),
 }
 
 
-def rows(path: Path, expected_columns: int) -> list[list[str]]:
+def rows(path: Path, expected_columns: int | tuple[int, ...]) -> list[list[str]]:
     result = []
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not line or line.startswith("#"):
@@ -40,8 +40,10 @@ def rows(path: Path, expected_columns: int) -> list[list[str]]:
         fields = line.split("\t")
         if fields[0] == "id":
             continue
-        if len(fields) != expected_columns:
-            raise ValueError(f"{path.relative_to(ROOT)}:{number}: expected {expected_columns} fields, got {len(fields)}")
+        widths = (expected_columns,) if isinstance(expected_columns, int) else expected_columns
+        if len(fields) not in widths:
+            expected = " or ".join(str(width) for width in widths)
+            raise ValueError(f"{path.relative_to(ROOT)}:{number}: expected {expected} fields, got {len(fields)}")
         result.append(fields)
     return result
 
@@ -99,12 +101,14 @@ def main() -> int:
             errors.append(str(error))
             continue
         local_ids: set[str] = set()
+        github_components: set[tuple[str, str]] = set()
+        github_commands: dict[str, set[str]] = defaultdict(set)
         for fields in channel_rows:
             tool_id = fields[0]
-            if tool_id in local_ids:
+            if tool_id in local_ids and method != "github":
                 errors.append(f"duplicate {method} manifest id: {tool_id}")
             local_ids.add(tool_id)
-            if tool_id in seen_channel_ids:
+            if tool_id in seen_channel_ids and seen_channel_ids[tool_id] != method:
                 errors.append(f"channel id {tool_id} occurs in both {seen_channel_ids[tool_id]} and {method}")
             seen_channel_ids[tool_id] = method
             if tool_id not in by_id:
@@ -113,6 +117,52 @@ def main() -> int:
                 errors.append(f"{tool_id}: catalog method {by_id[tool_id]['method']} disagrees with {method} manifest")
             if method == "manual" and not https_url(fields[1]):
                 errors.append(f"{tool_id}: manual URL must use HTTPS")
+            if method == "go":
+                if fields[2] == "latest" or not re.fullmatch(r"v\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?", fields[2]):
+                    errors.append(f"{tool_id}: Go version must be a pinned semantic version")
+            if method == "github":
+                if len(fields) == 7:
+                    component, repo, tag, architecture, asset_regex, checksum_url, mappings, strip, verify_args = (
+                        tool_id, fields[1], fields[2], "amd64", fields[3], fields[4], fields[5], fields[6], "-"
+                    )
+                else:
+                    _, component, repo, tag, architecture, asset_regex, checksum_url, mappings, strip, verify_args = fields
+                component_key = (tool_id, component)
+                if component_key in github_components:
+                    errors.append(f"duplicate GitHub component: {tool_id}/{component}")
+                github_components.add(component_key)
+                if not re.fullmatch(r"[a-z0-9][a-z0-9._+-]*", component):
+                    errors.append(f"{tool_id}: invalid GitHub component id {component!r}")
+                if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo):
+                    errors.append(f"{tool_id}/{component}: invalid GitHub repository")
+                if tag in {"latest", "master", "main"} or not re.fullmatch(r"v?\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?", tag):
+                    errors.append(f"{tool_id}/{component}: GitHub tag is not pinned")
+                if architecture not in {"amd64", "arm64"}:
+                    errors.append(f"{tool_id}/{component}: unsupported manifest architecture {architecture!r}")
+                if not asset_regex.startswith("^") or not asset_regex.endswith("$"):
+                    errors.append(f"{tool_id}/{component}: asset regex must be fully anchored")
+                try:
+                    re.compile(asset_regex)
+                except re.error as error:
+                    errors.append(f"{tool_id}/{component}: invalid asset regex: {error}")
+                if checksum_url == "-" or not https_url(checksum_url):
+                    errors.append(f"{tool_id}/{component}: checksum URL must be explicit HTTPS")
+                if not strip.isdigit():
+                    errors.append(f"{tool_id}/{component}: strip-components must be numeric")
+                for mapping in mappings.split(","):
+                    parts = mapping.split(":")
+                    if len(parts) == 1:
+                        parts.append(parts[0])
+                    if len(parts) != 2 or not all(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", part) for part in parts):
+                        errors.append(f"{tool_id}/{component}: invalid executable mapping {mapping!r}")
+                        continue
+                    github_commands[tool_id].add(parts[1])
+                if len(fields) == 10 and (verify_args == "-" or not re.fullmatch(r"[-A-Za-z0-9._+]+", verify_args)):
+                    errors.append(f"{tool_id}/{component}: safe non-networking verification arguments are required")
+        if method == "github":
+            for tool_id, commands in github_commands.items():
+                if tool_id in by_id and commands != set(by_id[tool_id]["executables"].split(",")):
+                    errors.append(f"{tool_id}: GitHub mappings disagree with catalog executables")
         expected = {tool_id for tool_id, row in by_id.items() if row["method"] == method}
         for tool_id in sorted(expected - local_ids):
             errors.append(f"catalog {tool_id} lacks its {method} channel entry")

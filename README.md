@@ -56,6 +56,12 @@ under `/opt/offsec`; verified release support refuses a download without its
 configured checksum. No global `sudo pip`, Kali repository, `curl | bash`, or
 unattended source script is used.
 
+The standard `network` profile includes pinned Chisel plus both checksum-verified
+Ligolo-ng roles. They are exposed as `chisel`, `ligolo-proxy`, and `ligolo-agent`.
+No client, listener, service, route, TUN interface, forwarding rule, firewall rule,
+or tunnel is started or created during installation; see
+[Installation](docs/INSTALLATION.md#pivoting-tools) for runtime privilege notes.
+
 ```console
 sudo ./install.sh                       # standard, no desktop
 sudo ./install.sh --profile core
